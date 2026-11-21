@@ -16,22 +16,6 @@
 
 ## 架构
 
-```mermaid
-flowchart LR
-  U[浏览器 Vue 3] -->|HTTP / SSE| C[Controller 层]
-  C --> O[编排层<br/>Chat / AgentRun / Plan / Workflow Service]
-  O --> R[AgentRuntime<br/>状态机 + LoopGuard]
-  R --> M[ModelAdapter<br/>OpenAI 兼容]
-  R --> T[ToolRegistry]
-  T --> MCP[MCP stdio 外部工具]
-  O --> MEM[MemoryManager]
-  O --> CP[CheckpointManager]
-  O --> TR[TraceManager / Evaluation]
-  MEM --> DB[(MySQL 8)]
-  CP --> DB
-  TR --> DB
-```
-
 分层约定：Controller 只做参数校验与转发；Service 负责业务编排；Runtime 独立于 Controller 与具体厂商 SDK；跨模块能力通过 `ModelAdapter` / `ToolExecutor` / `NodeExecutor` / `MemoryManager` 等接口隔离。
 
 ## 快速开始
