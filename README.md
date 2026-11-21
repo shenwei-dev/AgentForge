@@ -1,6 +1,6 @@
 # AgentForge
 
-> 可观测的智能体运行时与任务编排平台。面向学习与面试场景的个人项目，**不是生产级系统**。
+> 智能体运行时与任务编排平台
 
 以「模型只提出决策，Runtime 负责执行控制」为核心设计：统一模型适配层接入 OpenAI 兼容大模型 API，自研 Agent Runtime 实现结构化决策、工具调用与六类终止条件；在此之上构建任务规划、多角色协作、DAG 调度、上下文记忆、检查点恢复、MCP 外部工具、执行链路追踪与评测能力，配套 Vue 3 前端提供流式对话与执行过程可视化。
 
@@ -9,9 +9,9 @@
 | 层次 | 选型 |
 |---|---|
 | 后端 | Java 17 · Spring Boot 3.5.6 · MyBatis-Plus 3.5.12 · Spring Boot Actuator |
-| 存储 | MySQL 8（12 张表，完整脚本见 `sql/init.sql`） |
+| 存储 | MySQL 8 |
 | 前端 | Vue 3 · TypeScript · Vite · Element Plus · Pinia · Axios · markdown-it |
-| 外部工具 | MCP JSON-RPC 2.0 over stdio（Node 进程） |
+| 外部工具 | MCP JSON-RPC 2.0 over stdio|
 | 测试 / 部署 | JUnit 5 + Mockito · Docker Compose · Nginx |
 
 ## 架构
