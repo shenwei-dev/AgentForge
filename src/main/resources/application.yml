@@ -1,0 +1,209 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: AgentForge
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:agentforge}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:root}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 10000
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    async:
+
+      request-timeout: 300000
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+
+      id-type: input
+
+agentforge:
+  model:
+
+    active: ${MODEL_PROVIDER:qianwen}
+    providers:
+      qianwen:
+
+        base-url: ${QIANWEN_BASE_URL:https://maas.qianwenaiapi.com/compatible-mode/v1}
+        api-key: ${QIANWEN_API_KEY:}
+        model: ${QIANWEN_MODEL:deepseek-v4.1-flash}
+        temperature: 0.7
+        max-tokens: 4096
+        connect-timeout: 10s
+        read-timeout: 180s
+        capabilities:
+          function-calling: false
+          structured-output: false
+          streaming: true
+          context-window: 64000
+      amd:
+
+        base-url: ${AMD_BASE_URL:https://developer.amd.com.cn/radeon/api/v1}
+        api-key: ${AMD_API_KEY:}
+        model: ${AMD_MODEL:DeepSeek-V4-Flash}
+        temperature: 0.7
+        max-tokens: 4096
+        connect-timeout: 10s
+        read-timeout: 180s
+        capabilities:
+          function-calling: false
+          structured-output: false
+          streaming: true
+          context-window: 64000
+      deepseek:
+        base-url: https://api.deepseek.com
+        api-key: ${DEEPSEEK_API_KEY:}
+        model: deepseek-chat
+        temperature: 0.7
+        max-tokens: 4096
+        connect-timeout: 10s
+        read-timeout: 180s
+        capabilities:
+          function-calling: true
+          structured-output: false
+          streaming: true
+          context-window: 64000
+      openai:
+        base-url: https://api.openai.com
+        api-key: ${OPENAI_API_KEY:}
+        model: gpt-4o-mini
+        temperature: 0.7
+        max-tokens: 4096
+        connect-timeout: 10s
+        read-timeout: 180s
+        capabilities:
+          function-calling: true
+          structured-output: true
+          streaming: true
+          context-window: 128000
+      ollama:
+
+        base-url: http://localhost:11434
+        api-key: ${OLLAMA_API_KEY:ollama}
+        model: qwen2.5:7b
+        temperature: 0.7
+        max-tokens: 2048
+        connect-timeout: 5s
+        read-timeout: 300s
+        capabilities:
+          function-calling: false
+          structured-output: false
+          streaming: true
+          context-window: 32768
+  runtime:
+
+    max-rounds: 8
+    timeout: 120s
+    token-budget: 20000
+    max-model-retries: 2
+    max-tool-retries: 2
+    max-parse-retries: 2
+  tools:
+
+    granted-permissions: ["compute", "system:time", "file:read", "utility", "mcp:demo"]
+
+    workspace-dir: ${AGENTFORGE_WORKSPACE:${user.dir}}
+    file-read-max-bytes: 65536
+    file-search-max-results: 50
+    default-timeout: 5s
+    pool-size: 8
+  planner:
+
+    max-tasks: 12
+    max-repair-attempts: 2
+    max-title-length: 200
+    max-description-length: 2000
+  workflow:
+
+    pool-size: 4
+    demo-delay-ms: 150
+    level-timeout-seconds: 120
+  memory:
+
+    char-budget: 12000
+    max-messages: 40
+    summary-enabled: true
+    summary-threshold: 4
+    summary-max-chars: 600
+    max-reusable-results: 5
+    reusable-result-chars: 500
+    working-memory-max: 50
+  recovery:
+
+    max-node-retries: 2
+    retry-delay-ms: 50
+    node-timeout-seconds: 30
+    checkpoint-every-level: true
+    resume-enabled: true
+  evaluation:
+
+    latency-threshold-ms: 15000
+    max-rounds-threshold: 6
+    pass-score: 60
+    tasks:
+      - id: basic-qa
+        name: 基础问答
+        category: CHAT
+        prompt: 用一句话介绍 AgentForge
+        expected-keywords: ["AgentForge", "智能体"]
+      - id: tool-calc
+        name: 工具调用计算
+        category: TOOL
+        prompt: 用 calculator 工具计算 (12+3)*4
+        expected-keywords: ["60"]
+        expected-tool: calculator
+      - id: planning
+        name: 任务规划
+        category: PLAN
+        prompt: 研究 Spring AI 和 LangChain4j 的区别并生成对比报告
+        expected-keywords: ["报告", "对比"]
+      - id: workflow
+        name: 工作流调度
+        category: WORKFLOW
+        prompt: 运行示例 DAG 并检查节点状态
+        expected-keywords: ["SUCCEEDED"]
+  mcp:
+
+    enabled: ${MCP_ENABLED:true}
+    request-timeout: 10s
+    startup-timeout: 5s
+    servers:
+      - name: demo
+        command: node
+        args:
+          - mcp/echo-server.mjs
+        enabled: true
+        permission: mcp:demo
+        tool-prefix: mcp_demo_
+        allow: ["echo", "upper", "sum"]
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  metrics:
+    tags:
+      application: agentforge
+
+logging:
+  level:
+
+    com.example.agentforge: INFO
